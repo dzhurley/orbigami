@@ -12,10 +12,14 @@ const affectPosition = (x, y, z, trait) => {
     });
 };
 
-const Orb = ({ value }) => {
+const Orb = ({ useColor, value }) => {
     const color = useMemo(() => {
-        return `#${Math.round(0xFFFFFF / value).toString(16)}`;
-    }, [value]);
+        if (!useColor) {
+            return '#D7D7D7';
+        }
+        const hex = Math.round(0xFFFFFF / value).toString(16);
+        return `#${hex.length === 5 ? '0' + hex : hex}`;
+    }, [useColor, value]);
 
     const geoRef = useUpdate(geometry => {
         geometry.morphAttributes.position = [];
@@ -56,7 +60,7 @@ const Orb = ({ value }) => {
     );
 };
 
-const Content = ({ value }) => {
+const Content = ({ useColor, value }) => {
     const cameraRef = useRef();
     const controlsRef = useRef();
     const { canvas, size, setDefaultCamera } = useThree();
@@ -86,7 +90,7 @@ const Content = ({ value }) => {
                         ref={controlsRef}
                         args={[cameraRef.current, canvas]}
                     />
-                    <Orb value={value} />
+                    <Orb useColor={useColor} value={value} />
                 </>
             )}
         </>
@@ -94,7 +98,8 @@ const Content = ({ value }) => {
 };
 
 export default () => {
-    const [value, setValue] = useState(10);
+    const [value, setValue] = useState(1.5);
+    const [useColor, setUseColor] = useState(false);
     return (
         <>
             <style jsx global>{`
@@ -107,10 +112,67 @@ export default () => {
                     padding: 0;
                     overflow: hidden;
                     background: #272727;
+                    color: lightgray;
+                    position: relative;
+
+                    font-family: Courier;
+                }
+
+                h1 {
+                    position: absolute;
+                    top: 3rem;
+                    left: 50%;
+                    transform: translate(-50%);
+                }
+
+                .controls {
+                    position: absolute;
+                    width: 80vw;
+                    height: 1rem;
+                    left: 50%;
+                    bottom: 5rem;
+                    transform: translate(-50%);
+                    z-index: 1;
+                    padding: 0.5rem;
+
+                    background-color: lightgray;
+                    text-align: center;
+                }
+
+                .controls input[type=range] {
+                    width: 100%;
+                    margin: 0;
+                }
+
+                .controls input[type=checkbox] {
+                    margin: 2rem 0.5rem;
                 }
             `}</style>
+
+            <h1 className="current-value">{value}</h1>
+
+            <div className="controls">
+                <input
+                    type="range"
+                    min="1"
+                    max="2"
+                    step="0.001"
+                    value={value}
+                    onChange={evt => setValue(parseFloat(evt.target.value))}
+                />
+                <label htmlFor="colors">
+                    <input
+                        name="colors"
+                        type="checkbox"
+                        checked={useColor}
+                        onChange={evt => setUseColor(evt.target.checked)}
+                    />
+                    rave mode
+                </label>
+            </div>
+
             <Canvas>
-                <Content value={value} setValue={setValue} />
+                <Content useColor={useColor} value={value} setValue={setValue} />
             </Canvas>
         </>
     );
