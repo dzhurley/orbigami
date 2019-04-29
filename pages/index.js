@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { apply, Canvas, useRender, useThree, useUpdate } from 'react-three-fiber';
 import * as THREE from 'three';
 
-import { OrbitControls } from '../resources';
+import { Mic, OrbitControls } from '../resources';
 
 apply({ OrbitControls });
 
@@ -100,6 +100,12 @@ const Content = ({ useColor, value }) => {
 export default () => {
     const [value, setValue] = useState(1.5);
     const [useColor, setUseColor] = useState(false);
+    const [useMic, setUseMic] = useState(false);
+
+    useEffect(() => {
+        useMic ? Mic.on(setValue) : Mic.off();
+    }, [useMic]);
+
     return (
         <>
             <style jsx global>{`
@@ -145,23 +151,26 @@ export default () => {
                 }
 
                 .controls input[type=checkbox] {
+                    display: inline-block;
                     margin: 2rem 0.5rem;
                 }
             `}</style>
 
             <h1 className="current-value">{value}</h1>
 
-            <div className="controls">
+            <form className="controls">
                 <input
                     type="range"
                     min="1"
                     max="2"
                     step="0.001"
+                    disabled={useMic}
                     value={value}
                     onChange={evt => setValue(parseFloat(evt.target.value))}
                 />
                 <label htmlFor="colors">
                     <input
+                        id="colors"
                         name="colors"
                         type="checkbox"
                         checked={useColor}
@@ -169,10 +178,20 @@ export default () => {
                     />
                     rave mode
                 </label>
-            </div>
+                <label htmlFor="mic">
+                    <input
+                        id="mic"
+                        name="mic"
+                        type="checkbox"
+                        checked={useMic}
+                        onChange={evt => setUseMic(evt.target.checked)}
+                    />
+                    use mic
+                </label>
+            </form>
 
             <Canvas>
-                <Content useColor={useColor} value={value} setValue={setValue} />
+                <Content useColor={useColor} value={value} />
             </Canvas>
         </>
     );

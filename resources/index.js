@@ -1,3 +1,4 @@
 import { OrbitControls } from './OrbitControls';
+import Mic from './mic';
 
-export { OrbitControls };
+export { Mic, OrbitControls };
